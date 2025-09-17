@@ -190,6 +190,7 @@ export default function Login() {
             30%, 50%, 70% { transform: translateX(-6px); }
             40%, 60% { transform: translateX(6px); }
           }`}
+
       </style>
     </div>
   );
