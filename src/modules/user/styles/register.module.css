@@ -1,0 +1,145 @@
+.container {
+  /* variables locales al registro */
+  --bg: #0b0f1a;
+  --card: #121824cc;
+  --card-solid: #121824;
+  --text: #e5e7eb;
+  --muted: #9aa4b2;
+  --border: #1f2835;
+  --input: #0e1420;
+  --ring1: #22d3ee;
+  --ring2: #22c55e;
+  --btn1: #22c55e;
+  --btn2: #3b82f6;
+
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--bg);
+}
+
+.card {
+  background: var(--card);
+  padding: 2rem;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(74, 146, 173, 0.318);
+  backdrop-filter: blur(8px);
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text);
+  text-align: center;
+}
+
+.subtitle {
+  margin: 0 0 22px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.field {
+  margin-bottom: 1rem;
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--input);
+}
+
+.field input {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+}
+
+.field:focus-within {
+  border-color: var(--ring1);
+  box-shadow: 0 0 0 2px rgba(34,211,238,.25);
+}
+
+.button {
+  width: 100%;
+  padding: 12px;
+  background: var(--gradient);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.button:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loginSection {
+  margin-top: 1.5rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+.loginLink {
+  color: var(--ring1);
+  text-decoration: none;
+  margin-left: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+  color: var(--ring2);
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1.5rem;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .field {
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .card {
+    padding: 1rem;
+  }
+
+  .field input {
+    font-size: 13px;
+  }
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}

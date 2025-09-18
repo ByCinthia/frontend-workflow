@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useUser } from "../context";
+import { Link } from 'react-router-dom';
 import styles from "../styles/login.module.css";
 
 // Validaciones básicas (puedes cambiarlas por email real)
@@ -28,14 +29,17 @@ export default function Login() {
 
   const formRef = useRef<HTMLFormElement | null>(null);
 
-  // animación de entrada de la card
+  // Actualizar la animación de entrada para que sea más suave
   useEffect(() => {
     const card = formRef.current?.closest(`.${styles.card}`) as HTMLElement | null;
     if (!card) return;
+    
+    // Añadir fade in y slide up más suave
     card.style.opacity = "0";
-    card.style.transform = "translateY(10px)";
+    card.style.transform = "translateY(20px)";
+    
     requestAnimationFrame(() => {
-      card.style.transition = "opacity .35s ease, transform .35s ease";
+      card.style.transition = "all 0.3s ease";
       card.style.opacity = "1";
       card.style.transform = "translateY(0)";
     });
@@ -102,10 +106,10 @@ export default function Login() {
     <div className={styles.container}>
       <div className={styles.card}>
         <form ref={formRef} onSubmit={onSubmit}>
-          <h1 className={styles.title}>Sign In</h1>
-          <p className={styles.subtitle}>Access your account</p>
+          <h1 className={styles.title}>Bienvenido</h1>
+          <p className={styles.subtitle}>Accede a tu cuenta</p>
 
-          {/* Usuario */}
+          {/* Campo de Usuario - Mantenemos la estructura pero mejoramos la semántica */}
           <label className={styles.field}>
             <span className={styles.icon}>📧</span>
             <input
@@ -123,19 +127,20 @@ export default function Login() {
                 setUserErr(v.ok ? null : v.msg!);
               }}
               required
+              aria-label="Email o usuario"
             />
           </label>
           {userErr && (
-            <div style={{ color: "crimson", fontSize: 12, marginTop: -8, marginBottom: 8 }}>{userErr}</div>
+            <div className={styles.error} role="alert">{userErr}</div>
           )}
 
-          {/* Password */}
+          {/* Campo de Password - Mejoramos la accesibilidad */}
           <label className={styles.field}>
             <span className={styles.icon}>🔒</span>
             <input
               className={styles.input}
               type={showPw ? "text" : "password"}
-              placeholder="Password"
+              placeholder="Contraseña"
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -144,54 +149,58 @@ export default function Login() {
               onFocus={handleFocusWrap}
               onBlur={(e) => {
                 handleBlurWrap(e);
-                const v = validatePassword(e.currentTarget.value);
+                const v = validatePassword(e.target.value);
                 setPassErr(v.ok ? null : v.msg!);
               }}
               required
+              aria-label="Contraseña"
             />
             <button
               type="button"
               className={styles.eye}
               onClick={() => setShowPw((s) => !s)}
-              aria-label="toggle password"
+              aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"}
             >
-              {showPw ? "🙈" : "👁️"}
+              {showPw ? "ocultar" : "ver"}
             </button>
           </label>
           {passErr && (
-            <div style={{ color: "crimson", fontSize: 12, marginTop: -8, marginBottom: 8 }}>{passErr}</div>
+            <div className={styles.error} role="alert">{passErr}</div>
           )}
 
-          {/* Remember + forgot */}
+          {/* Remember + Forgot - Mejoramos el espaciado */}
           <div className={styles.actions}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <input type="checkbox" checked={remember} onChange={() => setRemember((r) => !r)} /> Keep me signed in
+            <label className={styles.remember}>
+              <input 
+                type="checkbox" 
+                checked={remember} 
+                onChange={() => setRemember((r) => !r)} 
+              /> 
+              <span>Mantenerme conectado</span>
             </label>
             <a className={styles.link} href="#" onClick={handleForgot}>
-              Forgot password?
+              ¿Olvidaste tu contraseña?
             </a>
           </div>
 
-          <button className={styles.button} disabled={!canSubmit}>
-            {loading ? "Signing in..." : "SIGN IN"}
+          <button 
+            className={styles.button} 
+            disabled={!canSubmit}
+            type="submit"
+          >
+            {loading ? "Iniciando sesión..." : "Iniciar sesión"}
           </button>
+
+          {/* Sección de registro mejorada */}
+          <div className={styles.registerSection}>
+            <p>¿No tienes cuenta? <Link to="/register" className={styles.registerLink}>Registrarse</Link></p>
+          </div>
         </form>
 
         {toast && (
-          <div style={{ marginTop: 12, textAlign: "center", fontSize: 13, color: "#d1d5db" }}>{toast}</div>
+          <div className={styles.toast} role="alert">{toast}</div>
         )}
       </div>
-
-      {/* keyframes locales por si no están en global */}
-      <style>
-        {`@keyframes shake {
-            10%, 90% { transform: translateX(-2px); }
-            20%, 80% { transform: translateX(4px); }
-            30%, 50%, 70% { transform: translateX(-6px); }
-            40%, 60% { transform: translateX(6px); }
-          }`}
-
-      </style>
     </div>
   );
 }

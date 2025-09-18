@@ -1,6 +1,7 @@
 
 /* src/app/styles/globals.css */
 
+
 :root {
   --bg: #f7f8fc;
   --text: #1f2937;
@@ -9,10 +10,19 @@
   --border: #e5e7eb;
 }
 
-html, body { block-size: 100%; }
+html, body, #root, #app { block-size: 100%; }
+
 body {
   margin: 0;
+  display: block;             /* <--- IMPORTANTE: NO FLEX */
   font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
 }
+
+/* asegúrate de que #root se estire */
+#root, #app {
+  inline-size: 100%;
+  min-inline-size: 100%;
+}
+

@@ -1,6 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, type ReactNode } from "react";
 import Login from "./modules/user/pages/login";
+import Register from "./modules/user/pages/register";
 import Dashboard from "./modules/user/pages/dashboard"; // <-- usa el de tu módulo
 import ProtectedRoute from "./modules/user/protectedRoute";
 import { UserCtx, type User } from "./modules/user/context";
@@ -53,11 +54,12 @@ function HomeRedirect() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <UserProvider>
         <Routes>
           <Route path="/" element={<HomeRedirect />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route
             path="/dashboard"
             element={
@@ -69,6 +71,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </UserProvider>
-    </BrowserRouter>
+    </Router>
   );
 }
