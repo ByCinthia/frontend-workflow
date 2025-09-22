@@ -1,31 +1,39 @@
-// Mock API sin backend real
+import axios from "axios";
 
-const fakeDB: { username: string; email: string; password: string }[] = [];
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+});
 
-function delay(ms = 500) {
-  return new Promise((res) => setTimeout(res, ms));
+api.interceptors.request.use((cfg) => {
+  const t = localStorage.getItem("access");
+  if (t) cfg.headers.Authorization = `Bearer ${t}`;
+  return cfg;
+});
+
+export async function registerReq(data: any) {
+  return api.post("/api/register/", data);
 }
 
-export async function loginReq(payload: { username: string; password: string }) {
-  await delay();
-  const user = fakeDB.find(
-    (u) => u.username === payload.username && u.password === payload.password
-  );
-  if (!user) {
-    throw { response: { data: { detail: "Credenciales inválidas" } } };
+export function setTokens(access: string, refresh: string) {
+  localStorage.setItem("access", access);
+  localStorage.setItem("refresh", refresh);
+}
+
+export async function refreshToken() {
+  const r = localStorage.getItem("refresh");
+  if (!r) return null;
+  const { data } = await api.post("/api/token/refresh/", { refresh: r });
+  localStorage.setItem("access", data.access);
+  return data.access;
+}
+
+api.interceptors.response.use(undefined, async (err) => {
+  if (err.response?.status === 401) {
+    const newAccess = await refreshToken();
+    if (newAccess) {
+      err.config.headers.Authorization = `Bearer ${newAccess}`;
+      return api.request(err.config);
+    }
   }
-  return {
-    access: "FAKE_TOKEN_" + user.username,
-    user: { username: user.username, email: user.email },
-  };
-}
-
-export async function registerReq(payload: { username: string; email: string; password: string }) {
-  await delay();
-  const exists = fakeDB.find((u) => u.username === payload.username || u.email === payload.email);
-  if (exists) {
-    throw { response: { data: { detail: "Usuario o email ya registrado" } } };
-  }
-  fakeDB.push(payload);
-  return { ok: true, user: { username: payload.username, email: payload.email } };
-}
+  throw err;
+});

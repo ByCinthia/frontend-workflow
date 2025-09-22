@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { useUser } from "../context";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
 import styles from "../styles/login.module.css";
+import { api, setTokens } from "../././api"; // <-- ruta correcta
 
-// Validaciones básicas (puedes cambiarlas por email real)
 function validateUsername(v: string) {
   return v.trim().length >= 3 ? { ok: true as const } : { ok: false as const, msg: "Mínimo 3 caracteres" };
 }
@@ -13,31 +12,26 @@ function validatePassword(v: string) {
 }
 
 export default function Login() {
-  const { login } = useUser();
+  const navigate = useNavigate();
+  console.log("BASE:", import.meta.env.VITE_API_URL, api.defaults.baseURL);
 
-  // ---- estado del formulario
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPw, setShowPw] = useState(false);
 
-  // ---- errores y UI
   const [userErr, setUserErr] = useState<string | null>(null);
   const [passErr, setPassErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   const formRef = useRef<HTMLFormElement | null>(null);
-
-  // Actualizar la animación de entrada para que sea más suave
+  
   useEffect(() => {
     const card = formRef.current?.closest(`.${styles.card}`) as HTMLElement | null;
     if (!card) return;
-    
-    // Añadir fade in y slide up más suave
     card.style.opacity = "0";
     card.style.transform = "translateY(20px)";
-    
     requestAnimationFrame(() => {
       card.style.transition = "all 0.3s ease";
       card.style.opacity = "1";
@@ -57,12 +51,10 @@ export default function Login() {
   }
 
   function handleFocusWrap(e: React.FocusEvent<HTMLInputElement>) {
-    const w = e.currentTarget.closest(`.${styles.field}`) as HTMLElement | null;
-    w?.classList.add("focused");
+    e.currentTarget.closest(`.${styles.field}`)?.classList.add("focused");
   }
   function handleBlurWrap(e: React.FocusEvent<HTMLInputElement>) {
-    const w = e.currentTarget.closest(`.${styles.field}`) as HTMLElement | null;
-    w?.classList.remove("focused");
+    e.currentTarget.closest(`.${styles.field}`)?.classList.remove("focused");
   }
 
   function validateFields(): boolean {
@@ -83,19 +75,20 @@ export default function Login() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setToast(null);
-
     if (!validateFields()) {
       shakeCard();
       return;
     }
-
     setLoading(true);
     try {
-      await login(username, password);
+      const { data } = await api.post("/api/token/", { username, password });
+      setTokens(data.access, data.refresh);
       if (remember) localStorage.setItem("remember", "1");
       else localStorage.removeItem("remember");
-    } catch {
-      setToast("Credenciales inválidas");
+      navigate("/dashboard");
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || "Credenciales inválidas";
+      setToast(msg);
       shakeCard();
     } finally {
       setLoading(false);
@@ -109,7 +102,6 @@ export default function Login() {
           <h1 className={styles.title}>Bienvenido</h1>
           <p className={styles.subtitle}>Accede a tu cuenta</p>
 
-          {/* Campo de Usuario - Mantenemos la estructura pero mejoramos la semántica */}
           <label className={styles.field}>
             <span className={styles.icon}>📧</span>
             <input
@@ -130,11 +122,8 @@ export default function Login() {
               aria-label="Email o usuario"
             />
           </label>
-          {userErr && (
-            <div className={styles.error} role="alert">{userErr}</div>
-          )}
+          {userErr && <div className={styles.error} role="alert">{userErr}</div>}
 
-          {/* Campo de Password - Mejoramos la accesibilidad */}
           <label className={styles.field}>
             <span className={styles.icon}>🔒</span>
             <input
@@ -164,42 +153,26 @@ export default function Login() {
               {showPw ? "ocultar" : "ver"}
             </button>
           </label>
-          {passErr && (
-            <div className={styles.error} role="alert">{passErr}</div>
-          )}
+          {passErr && <div className={styles.error} role="alert">{passErr}</div>}
 
-          {/* Remember + Forgot - Mejoramos el espaciado */}
           <div className={styles.actions}>
             <label className={styles.remember}>
-              <input 
-                type="checkbox" 
-                checked={remember} 
-                onChange={() => setRemember((r) => !r)} 
-              /> 
+              <input type="checkbox" checked={remember} onChange={() => setRemember((r) => !r)} />
               <span>Mantenerme conectado</span>
             </label>
-            <a className={styles.link} href="#" onClick={handleForgot}>
-              ¿Olvidaste tu contraseña?
-            </a>
+            <a className={styles.link} href="#" onClick={handleForgot}>¿Olvidaste tu contraseña?</a>
           </div>
 
-          <button 
-            className={styles.button} 
-            disabled={!canSubmit}
-            type="submit"
-          >
+          <button className={styles.button} disabled={!canSubmit} type="submit">
             {loading ? "Iniciando sesión..." : "Iniciar sesión"}
           </button>
 
-          {/* Sección de registro mejorada */}
           <div className={styles.registerSection}>
             <p>¿No tienes cuenta? <Link to="/register" className={styles.registerLink}>Registrarse</Link></p>
           </div>
         </form>
 
-        {toast && (
-          <div className={styles.toast} role="alert">{toast}</div>
-        )}
+        {toast && <div className={styles.toast} role="alert">{toast}</div>}
       </div>
     </div>
   );
